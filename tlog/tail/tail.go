@@ -27,7 +27,7 @@ type Tail struct {
 
 type DatePos struct {
 	PathFmt string
-	date    string
+	Date    string
 	FilePos int64
 	Old     OutPutBuf
 }
@@ -37,12 +37,12 @@ type OutPutBuf struct {
 	FilePos int64
 }
 
-func (d *DatePos) Date() (time.Time, error) {
-	return time.Parse("2006-01-02", d.date)
+func (d *DatePos) GetDate() (time.Time, error) {
+	return time.Parse("2006-01-02", d.Date)
 }
 
 func (d *DatePos) SetDate(t time.Time) {
-	d.date = t.Format("2006-01-02")
+	d.Date = t.Format("2006-01-02")
 }
 
 func (t *Tail) DatePos(filePathPattern string) (DatePos, error) {
@@ -74,7 +74,6 @@ func (t *Tail) SetDatePos(filePathPattern string, pos DatePos) (PosTransaction, 
 	err = e.Encode(&pos)
 	return PosTransaction{posFile}, err
 }
-
 func (p PosTransaction) Drop() error {
 	f := p.file + TransctionExt
 	err := os.Remove(f)
