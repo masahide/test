@@ -1,28 +1,16 @@
 package tail
 
-import (
-	"testing"
-	"time"
-)
+import "testing"
 
 func TestOpen(t *testing.T) {
-	DateReader
-	tail := &Tail{
-		PosDir:  "./",
-		PathFmt: "/fuga/%Y%m%d/hoge/file.log",
+	dr := DateReader{
+		PathFmt:   "./date_read_test.go",
+		PosDir:    "./",
+		StartTail: true,
 	}
 
-	pos := DatePos{
-		PathFmt: "hoge",
-		FilePos: 1,
-	}
-	pos.SetDate(time.Now())
-
-	pt, err := tail.SetDatePos(pos)
+	err := dr.Open()
 	if err != nil {
 		t.Errorf("got: %v\nwant: %v", err, nil)
-	}
-	err = pt.Commit()
-	if err != nil {
 	}
 }

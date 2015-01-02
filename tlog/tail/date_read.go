@@ -55,6 +55,9 @@ func (t *DateReader) Open() error {
 		return err
 	}
 	if pos == (DatePos{}) { // posファイルがない場合は本日分のログファイルを指定
+		if t.StartTail {
+			return t.OpenTail()
+		}
 		return t.OpenDate(time.Now(), 0)
 	}
 	t.date, err = pos.GetDate()
@@ -62,6 +65,16 @@ func (t *DateReader) Open() error {
 		return err
 	}
 	return t.openFile(pos)
+}
+
+// 日付のファイルを開く
+func (t *DateReader) OpenTail() error {
+	err := t.OpenDate(time.Now(), 0)
+	if err != nil {
+		return err
+	}
+	_, err = t.file.Seek(0, os.SEEK_END)
+	return err
 }
 
 // 日付のファイルを開く
@@ -92,8 +105,8 @@ func (t *DateReader) openFile(pos DatePos) error {
 	if err != nil {
 		return err
 	}
-	if pos.FilePos > 0 {
-		_, err = t.file.Seek(pos.FilePos, 1)
+	if pos.FilePos != 0 {
+		_, err = t.file.Seek(pos.FilePos, os.SEEK_CUR)
 	}
 	return err
 }

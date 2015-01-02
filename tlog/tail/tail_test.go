@@ -7,7 +7,7 @@ import (
 )
 
 func TestSetPos(t *testing.T) {
-	tail := &Tail{
+	tail := &DateReader{
 		PosDir:  "./",
 		PathFmt: "/fuga/%Y%m%d/hoge/file.log",
 	}
@@ -42,7 +42,7 @@ func TestSetPos(t *testing.T) {
 }
 
 func TestOverWriteSetDatePos(t *testing.T) {
-	tail := &Tail{
+	tail := &DateReader{
 		PosDir:  "./",
 		PathFmt: "/fuga/%Y%m%d/hoge/file.log",
 	}
