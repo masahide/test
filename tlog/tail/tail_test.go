@@ -7,8 +7,10 @@ import (
 )
 
 func TestSetPos(t *testing.T) {
-	tail := &Tail{PosDir: "./"}
-	posfile := "/fuga/hoge/file.log"
+	tail := &Tail{
+		PosDir:  "./",
+		PathFmt: "/fuga/%Y%m%d/hoge/file.log",
+	}
 
 	pos := DatePos{
 		PathFmt: "hoge",
@@ -16,17 +18,17 @@ func TestSetPos(t *testing.T) {
 	}
 	pos.SetDate(time.Now())
 
-	pt, err := tail.SetDatePos(posfile, pos)
+	pt, err := tail.SetDatePos(pos)
 	if err != nil {
-		t.Errorf("got %v\nwant %v", err, nil)
+		t.Errorf("got: %v\nwant: %v", err, nil)
 	}
 	err = pt.Commit()
 	if err != nil {
-		t.Errorf("got %v\nwant %v", err, nil)
+		t.Errorf("got: %v\nwant: %v", err, nil)
 	}
-	p, err := tail.DatePos(posfile)
+	p, err := tail.DatePos()
 	if err != nil {
-		t.Errorf("got %v\nwant %v", err, nil)
+		t.Errorf("got: %v\nwant: %v", err, nil)
 	}
 	if p != pos {
 		t.Errorf("pos: %v\np: %v", pos, p)
@@ -40,23 +42,25 @@ func TestSetPos(t *testing.T) {
 }
 
 func TestOverWriteSetDatePos(t *testing.T) {
-	tail := &Tail{PosDir: "./"}
-	posfile := "/hoge/fuga/hoge/file.log"
+	tail := &Tail{
+		PosDir:  "./",
+		PathFmt: "/fuga/%Y%m%d/hoge/file.log",
+	}
 
 	pos := DatePos{
 		PathFmt: "hoge",
 		FilePos: 1,
 	}
 	pos.SetDate(time.Now())
-	tail.SetDatePos(posfile, pos)
-	tail.SetDatePos(posfile, pos)
-	pt, _ := tail.SetDatePos(posfile, pos)
+	tail.SetDatePos(pos)
+	tail.SetDatePos(pos)
+	pt, _ := tail.SetDatePos(pos)
 	pt.Commit()
-	p, _ := tail.DatePos(posfile)
+	p, _ := tail.DatePos()
 	if p != pos {
 		t.Errorf("got %v\nwant %v", pos, p)
 	}
-	err := os.Remove(path2name(posfile))
+	err := os.Remove(path2name(tail.PathFmt))
 	if err != nil {
 		t.Errorf("got %v\nwant %v", err, nil)
 	}
