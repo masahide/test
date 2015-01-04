@@ -24,6 +24,22 @@ func (t *DateWriter) mkFilePath() string {
 	return filepath.Join(t.OutDir, t.Daemon+"."+t.Type+","+t.Name+"."+t.dateTime.Format("200601021504"))
 }
 
+func (t *DateWriter) OpenCloseDate(dt time.Time) error {
+	var err error
+	dt = dt.Truncate(t.Interval)
+	if t.file != nil && !dt.Equal(t.dateTime) {
+		err = t.file.Close()
+		if err != nil {
+			return err
+		}
+		t.file, err = os.OpenFile(t.mkFilePath(), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			return err
+		}
+	}
+	return err
+}
+
 func (t *DateWriter) Date() time.Time {
 	return t.dateTime
 }

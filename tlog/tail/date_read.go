@@ -111,6 +111,19 @@ func (t *DateReader) openFile(pos DatePos) error {
 	return err
 }
 
+func (t *DateReader) FileTime() time.Time {
+	today := time.Now().Truncate(24 * time.Hour)
+	if t.date.Equal(today) { // 当日
+		return time.Now()
+	}
+	if t.date.Equal(today.Add(-24 * time.Hour)) { // 昨日
+		if time.Since(today) <= delay { // 日替わり直後
+			return t.date.Add(24*time.Hour - time.Second)
+		}
+	}
+	return t.date
+}
+
 // 開いているファイルが最新のログファイルかどうか
 func (t *DateReader) IsRealtimeRead() bool {
 	today := time.Now().Truncate(24 * time.Hour)

@@ -2,6 +2,7 @@ package tail
 
 import (
 	"fmt"
+	"io"
 	"time"
 )
 
@@ -12,7 +13,7 @@ type DateConfig struct {
 	Daemon    string
 	Type      string
 	Name      string
-	Interval  int
+	Interval  int // time.Second
 	StartDt   string
 	StartTail bool
 }
@@ -25,12 +26,16 @@ type DateTail struct {
 
 func (t *DateTail) TailF() {
 	for {
+		t.Tail()
 
 	}
 }
 
 func (t *DateTail) Tail() {
-
+	t.In.Open()
+	ft := t.In.FileTime()
+	t.Out.OpenCloseDate(ft)
+	io.Copy(&t.Out, &t.In)
 }
 
 func NewDateTail(c DateConfig) (*DateTail, error) {
