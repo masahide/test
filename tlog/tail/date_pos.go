@@ -10,6 +10,7 @@ import (
 
 type DatePos struct {
 	PathFmt string
+	Path    string
 	Date    string
 	FilePos int64
 	Old     OutPutBuf
@@ -33,6 +34,26 @@ type PosTransaction struct {
 	file string
 }
 
+func (t *DateReader) PosTransaction() (PosTransaction, error) {
+	posFile := path.Join(t.PosDir, path2name(t.PathFmt))
+
+	tFileName := posFile + TransctionExt
+	fi, err := os.OpenFile(tFileName, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0644)
+	if err != nil {
+		return PosTransaction{}, fmt.Errorf("Open:%s %s", err, tFileName)
+	}
+	pos, err := t.DatePos()
+	if err != nil {
+		return PosTransaction{}, err
+	}
+	pos.Old.Date = pos.Date
+	pos.Old.FilePos = pos.FilePos
+	pos.Old.Path = pos.Path
+	e := json.NewEncoder(fi)
+	err = e.Encode(&pos)
+	fi.Close()
+	return PosTransaction{posFile}, err
+}
 func (t *DateReader) SetDatePos(pos DatePos) (PosTransaction, error) {
 	posFile := path.Join(t.PosDir, path2name(t.PathFmt))
 

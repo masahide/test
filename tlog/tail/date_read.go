@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/cenkalti/backoff"
@@ -22,6 +23,7 @@ type DateReader struct {
 
 	date     time.Time
 	file     ReadSeekCloser
+	path     string
 	lastByte byte
 	retry    *backoff.ExponentialBackOff
 }
@@ -97,14 +99,26 @@ func (t *DateReader) openFile(pos DatePos) error {
 		return err
 	}
 	filePath := Date2Path(pos.PathFmt, t.date)
-	if Exists(filePath) {
-		t.file, err = os.OpenFile(filePath, os.O_RDONLY, 0600)
+	matchPath, err := filepath.Glob(filePath)
+	if err != nil {
+		return err
+	}
+	if len(matchPath) > 0 {
+		t.file, err = os.OpenFile(matchPath[0], os.O_RDONLY, 0600)
 	} else {
-		t.file, err = GzOpen(filePath + ".gz") // 生ファイルがなければgzファイルを開く
+		matchPath, err := filepath.Glob(filePath + ".gz")
+		if err != nil {
+			return err
+		}
+		if len(matchPath) == 0 {
+			return fmt.Errorf("File not found. Glob path:%s", filePath+".gz")
+		}
+		t.file, err = GzOpen(matchPath[0]) // 生ファイルがなければgzファイルを開く
 	}
 	if err != nil {
 		return err
 	}
+	t.path = matchPath[0]
 	if pos.FilePos != 0 {
 		_, err = t.file.Seek(pos.FilePos, os.SEEK_CUR)
 	}
